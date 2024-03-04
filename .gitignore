@@ -1,5 +1,5 @@
 /target
-#.DS_Store
 
 # ignore .DS_Store files everywhere
 **/.DS_Store
+/.env

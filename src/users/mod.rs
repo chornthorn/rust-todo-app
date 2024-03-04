@@ -9,7 +9,7 @@ mod entities;
 
 
 // configure the server scope
-pub fn config(cfg: &mut web::ServiceConfig) {
+pub fn router(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/users")
             .service(index)
