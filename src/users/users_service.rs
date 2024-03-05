@@ -16,7 +16,7 @@ impl UsersService {
     }
 
     fn repository(self) -> UsersRepository {
-        UsersRepository::new(self.pool)
+        UsersRepository::new(self.pool.clone())
     }
 
     pub async fn get_all_users(self) -> HttpResponse {

@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 use crate::todos::todos_repository::{InMemoryTodoRepository, TodoRepository};
 use actix_web::HttpResponse;
 

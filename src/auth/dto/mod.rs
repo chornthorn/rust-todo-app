@@ -1,16 +1,24 @@
 use serde::{Deserialize, Serialize};
+use validator::Validate;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug, Clone, Validate)]
 pub struct LoginDto {
+    #[validate(email)]
     pub email: String,
+
+    #[validate(length(min = 6,message = "Password must be at least 6 characters"))]
     pub password: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Validate, Clone)]
 pub struct RegisterDto {
+
+    #[validate(email)]
     pub email: String,
+
+    #[validate(length(min = 6,message = "Password must be at least 6 characters"))]
     pub password: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
-    pub phone: Option<String>,
+
+    #[validate(length(min = 2,message = "Username must be at least 2 characters"))]
+    pub username: String,
 }

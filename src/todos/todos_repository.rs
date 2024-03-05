@@ -61,7 +61,7 @@ impl TodoRepository for InMemoryTodoRepository {
         })
     }
 
-    async fn delete(&self, id: i32) -> Result<(), String> {
+    async fn delete(&self, _id: i32) -> Result<(), String> {
         Ok(())
     }
 }

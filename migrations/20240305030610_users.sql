@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS users;
 -- create the table
 CREATE TABLE users
 (
-    id         SERIAL PRIMARY KEY,
+    id         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     username   VARCHAR(255) NOT NULL,
     password   VARCHAR(255) NOT NULL,
     email      VARCHAR(255) NOT NULL,

@@ -1,7 +1,10 @@
+#![allow(unused)]
+
 use crate::shared::constant::HttpError;
 use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
+use validator::ValidationErrors;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonResponder {
@@ -42,6 +45,20 @@ impl JsonResponder {
     // bad request
     pub fn bad_request(message: &'static str) -> HttpResponse {
         HttpResponse::BadRequest().json(JsonResponder::new(message, 400, None))
+    }
+
+    // validation error
+    pub fn validation_error(messages: ValidationErrors) -> HttpResponse {
+        HttpResponse::UnprocessableEntity().json(JsonResponder::new(
+            "Validation error",
+            422,
+            Some(serde_json::to_value(messages).unwrap()),
+        ))
+    }
+
+    // unauthorized
+    pub fn unauthorized(message: &'static str) -> HttpResponse {
+        HttpResponse::Unauthorized().json(JsonResponder::new(message, 401, None))
     }
 
     // bad request

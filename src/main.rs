@@ -1,7 +1,12 @@
+#![allow(unused)]
+
+use std::error::Error;
 use crate::config::{route_not_found, AppConfig};
 use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, error, ResponseError};
+use futures::TryFutureExt;
 use sqlx::mysql::MySqlPoolOptions;
+use crate::shared::response::JsonResponder;
 
 mod auth;
 mod config;
@@ -27,6 +32,7 @@ fn router_config(cfg: &mut web::ServiceConfig) {
     );
 }
 
+#[rustfmt::skip]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     // load environment variables
@@ -55,6 +61,14 @@ async fn main() -> std::io::Result<()> {
 
     let app_config = AppConfig::new("Todo Backend", pool);
 
+    // custom json configuration
+    let json_cfg = web::JsonConfig::default()
+        .error_handler(|err, req| {
+            error::InternalError::from_response(err, {
+                JsonResponder::bad_request("Invalid payload, please check your request body")
+            }).into()
+        });
+
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
@@ -63,10 +77,12 @@ async fn main() -> std::io::Result<()> {
                 name: app_config.name,
                 pool: app_config.pool.clone(),
             }))
+            .app_data(json_cfg.clone())
             .configure(router_config)
             .default_service(web::route().to(route_not_found))
     })
-    .bind("0.0.0.0:8080")?
-    .run()
-    .await
+        .workers(2)
+        .bind("0.0.0.0:8080")?
+        .run()
+        .await
 }

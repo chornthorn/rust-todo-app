@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 pub mod constant;
 pub mod response;
 pub mod bcrypt_helper;

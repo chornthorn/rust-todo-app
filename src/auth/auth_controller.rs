@@ -1,16 +1,26 @@
+#![allow(unused)]
+
 use crate::auth::auth_service::AuthService;
 use crate::auth::dto::{LoginDto, RegisterDto};
 use actix_web::{get, post, web, HttpResponse, Responder};
+use validator::Validate;
 use crate::config::AppConfig;
+use crate::shared::response::JsonResponder;
 
-#[post("/login")]
+#[post("login")]
 async fn login(body: web::Json<LoginDto>, data: web::Data<AppConfig>) -> impl Responder {
-    AuthService::new(data.pool.clone()).login(body.into_inner()).await
+    match body.validate() {
+        Ok(_) => AuthService::new(data.pool.clone()).login(body.into_inner()).await,
+        Err(err) => JsonResponder::validation_error(err),
+    }
 }
 
-#[post("/register")]
+#[post("register")]
 async fn register(dto: web::Json<RegisterDto>, data: web::Data<AppConfig>) -> impl Responder {
-    AuthService::new(data.pool.clone()).register(dto.into_inner()).await
+    match dto.validate() {
+        Ok(_) => AuthService::new(data.pool.clone()).register(dto.into_inner()).await,
+        Err(err) => JsonResponder::validation_error(err),
+    }
 }
 
 #[post("/logout")]
