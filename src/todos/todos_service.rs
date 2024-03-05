@@ -1,4 +1,4 @@
-use actix_web::{HttpResponse, Responder};
+use actix_web::{HttpResponse};
 use crate::todos::todos_repository::{InMemoryTodoRepository, TodoRepository};
 
 pub struct TodosService {}

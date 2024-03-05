@@ -1,8 +1,5 @@
 use actix_web::{get, App, HttpServer, Responder, HttpResponse, web};
 use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
-use futures::TryStreamExt;
-use log::info;
-use serde::{Deserialize, Serialize};
 use crate::config::{AppConfig, route_not_found};
 use sqlx::mysql::MySqlPoolOptions;
 
@@ -42,13 +39,13 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     // create a database pool
-    let conn = match MySqlPoolOptions::new()
+    let db_connection = match MySqlPoolOptions::new()
         .max_connections(10)
         .connect(&std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
         .await
     {
         Ok(pool) => {
-            info!("✅ \" Connection to the database is successful!");
+            println!("✅ Connection to the database is successful!");
             pool
         }
         Err(err) => {
@@ -59,16 +56,16 @@ async fn main() -> std::io::Result<()> {
 
 
     let app_config = AppConfig::new(
-        "Todo Backend".to_string(),
-        conn,
+        "Todo Backend",
+        db_connection,
     );
 
     HttpServer::new(move ||
         App::new()
             .wrap(Logger::default())
             .wrap(NormalizePath::new(TrailingSlash::Trim))
-            .app_data(web::Data::new( AppConfig {
-                name: app_config.name.clone(),
+            .app_data(web::Data::new(AppConfig {
+                name: app_config.name,
                 db_pool: app_config.db_pool.clone(),
             }))
             .configure(router_config)
