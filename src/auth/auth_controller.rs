@@ -1,15 +1,16 @@
 use crate::auth::auth_service::AuthService;
 use crate::auth::dto::{LoginDto, RegisterDto};
 use actix_web::{get, post, web, HttpResponse, Responder};
+use crate::config::AppConfig;
 
 #[post("/login")]
-async fn login(body: web::Json<LoginDto>) -> impl Responder {
-    AuthService::new().login(body.into_inner()).await
+async fn login(body: web::Json<LoginDto>, data: web::Data<AppConfig>) -> impl Responder {
+    AuthService::new(data.pool.clone()).login(body.into_inner()).await
 }
 
 #[post("/register")]
-async fn register(dto: web::Json<RegisterDto>) -> impl Responder {
-    AuthService::new().register(dto.into_inner()).await
+async fn register(dto: web::Json<RegisterDto>, data: web::Data<AppConfig>) -> impl Responder {
+    AuthService::new(data.pool.clone()).register(dto.into_inner()).await
 }
 
 #[post("/logout")]

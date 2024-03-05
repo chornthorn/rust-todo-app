@@ -30,13 +30,18 @@ impl JsonResponder {
     }
 
     // to response
-    pub fn ok(message: &'static str, status: u16, data: Option<serde_json::Value>) -> HttpResponse {
-        HttpResponse::Ok().json(JsonResponder::new(message, status, data))
+    pub fn ok(message: &'static str, data: Option<serde_json::Value>) -> HttpResponse {
+        HttpResponse::Ok().json(JsonResponder::new(message, 200, data))
     }
 
     // created response
     pub fn created(message: &'static str, data: Option<serde_json::Value>) -> HttpResponse {
         HttpResponse::Created().json(JsonResponder::new(message, 201, data))
+    }
+
+    // bad request
+    pub fn bad_request(message: &'static str) -> HttpResponse {
+        HttpResponse::BadRequest().json(JsonResponder::new(message, 400, None))
     }
 
     // bad request

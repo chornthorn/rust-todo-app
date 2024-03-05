@@ -4,7 +4,7 @@ use crate::users::users_controller::{
 use actix_web::web;
 
 mod dto;
-mod entities;
+pub mod entities;
 pub mod users_controller;
 pub mod users_repository;
 pub mod users_service;

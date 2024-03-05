@@ -49,7 +49,7 @@ async fn main() -> std::io::Result<()> {
         }
         Err(err) => {
             println!("🔥 Failed to connect to the database: {:?}", err);
-            std::process::exit(1);
+            std::process::exit(1)
         }
     };
 

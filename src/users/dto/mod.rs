@@ -14,17 +14,17 @@ lazy_static! {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Validate)]
 pub struct CreateUserDto {
-    #[validate(
-        length(
-            min = 3,
-            max = 255,
-            message = "Username must be between 3 and 255 characters"
-        ),
-        regex(
-            path = "USERNAME_REGEX",
-            message = "Username must not contain special characters or spaces"
-        )
-    )]
+    // #[validate(
+    //     length(
+    //         min = 3,
+    //         max = 255,
+    //         message = "Username must be between 3 and 255 characters"
+    //     ),
+    //     regex(
+    //         path = "USERNAME_REGEX",
+    //         message = "Username must not contain special characters or spaces"
+    //     )
+    // )]
     pub username: String,
 
     #[validate(length(
@@ -34,7 +34,7 @@ pub struct CreateUserDto {
     ))]
     pub password: String,
 
-    #[validate(regex(path = "EMAIL_REGEX", message = "Email must be a valid email"))]
+    // #[validate(regex(path = *"EMAIL_REGEX", message = "Email must be a valid email"))]
     pub email: String,
 }
 

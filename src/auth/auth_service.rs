@@ -1,18 +1,32 @@
 use crate::auth::dto::{LoginDto, RegisterDto};
 use actix_web::HttpResponse;
+use sqlx::MySqlPool;
+use crate::auth::auth_repository::AuthRepository;
+use crate::shared::response::JsonResponder;
 
-pub struct AuthService {}
+pub struct AuthService {
+    pool: MySqlPool,
+}
 
 impl AuthService {
-    pub fn new() -> Self {
-        Self {}
+
+    pub fn new(pool: MySqlPool) -> Self {
+        AuthService { pool }
     }
 
-    pub async fn login(&self, login: LoginDto) -> HttpResponse {
-        if login.email == "admin@gmail.com" && login.password == "123456" {
-            HttpResponse::Ok().json("login successfully")
-        } else {
-            HttpResponse::Unauthorized().json("Invalid username or password")
+    fn repository(self) -> AuthRepository {
+        AuthRepository::new(self.pool)
+    }
+
+    pub async fn login(self, login: LoginDto) -> HttpResponse {
+        let repository = self.repository();
+        let user = repository.login(login).await;
+        match user {
+            Ok(user) => JsonResponder::ok(
+                "login successfully",
+                Some(serde_json::to_value(user).unwrap())
+            ),
+            Err(e) => JsonResponder::match_err(e),
         }
     }
 
