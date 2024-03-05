@@ -1,7 +1,10 @@
 use actix_web::{get, App, HttpServer, Responder, HttpResponse, web};
 use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
+use futures::TryStreamExt;
+use log::info;
 use serde::{Deserialize, Serialize};
 use crate::config::{AppConfig, route_not_found};
+use sqlx::mysql::MySqlPoolOptions;
 
 mod users;
 mod config;
@@ -38,14 +41,36 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_BACKTRACE", "1");
     env_logger::init();
 
-    let app_config = AppConfig::new("Todo Backend Api".to_string());
+    // create a database pool
+    let conn = match MySqlPoolOptions::new()
+        .max_connections(10)
+        .connect(&std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
+        .await
+    {
+        Ok(pool) => {
+            info!("✅ \" Connection to the database is successful!");
+            pool
+        }
+        Err(err) => {
+            println!("🔥 Failed to connect to the database: {:?}", err);
+            std::process::exit(1);
+        }
+    };
+
+
+    let app_config = AppConfig::new(
+        "Todo Backend".to_string(),
+        conn,
+    );
 
     HttpServer::new(move ||
         App::new()
             .wrap(Logger::default())
             .wrap(NormalizePath::new(TrailingSlash::Trim))
-            .app_data(app_config.clone())
-            .service(index)
+            .app_data(web::Data::new( AppConfig {
+                name: app_config.name.clone(),
+                db_pool: app_config.db_pool.clone(),
+            }))
             .configure(router_config)
             .default_service(web::route().to(route_not_found))
         )

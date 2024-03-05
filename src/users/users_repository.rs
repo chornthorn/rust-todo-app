@@ -1,45 +1,133 @@
+use sqlx::{MySql, MySqlPool, Pool};
+use crate::users::dto::{CreateUserDto, UpdateUserDto};
 use crate::users::entities::User;
+use crate::shared::constant::HttpError;
 
 pub trait UserRepository {
-    async fn create_user(&self, username: String, password: String, email: String) -> Result<User, String>;
-    async fn get_user_by_id(&self, id: i32) -> Result<User, String>;
-    async fn update_user(&self, id: i32, username: Option<String>, password: Option<String>, email: Option<String>) -> Result<User, String>;
-    async fn delete_user(&self, id: i32) -> Result<String, String>;
+    fn new(pool: Pool<MySql>) -> Self;
+    async fn get_all_users(&self) -> Result<Vec<User>, HttpError>;
+    async fn create_user(&self, dto: CreateUserDto) -> Result<User, HttpError>;
+    async fn get_user_by_id(&self, id: i32) -> Result<User, HttpError>;
+    async fn update_user(&self, id: i32, update_user_dto: UpdateUserDto) -> Result<User, HttpError>;
+    async fn delete_user(&self, id: i32) -> Result<String, HttpError>;
 }
 
-pub struct UsersRepository {}
+pub struct UsersRepository {
+    // add your database pool here
+    pub pool: MySqlPool,
+}
 
 impl UserRepository for UsersRepository {
-    async fn create_user(&self, username: String, password: String, email: String) -> Result<User, String> {
-        Ok(User {
-            id: 1,
-            username,
-            password,
-            email,
-        })
+    fn new(pool: MySqlPool) -> Self {
+        UsersRepository {
+            pool,
+        }
     }
 
-    async fn get_user_by_id(&self, id: i32) -> Result<User, String> {
-        let user = User {
-            id,
-            username: "Jonh Deo 2".to_string(),
-            password: "123456".to_string(),
-            email: "jonhdeo@gmail.com".to_string(),
-        };
-        Ok(user)
+    async fn get_all_users(&self) -> Result<Vec<User>, HttpError> {
+        let users = sqlx::query_as!(User,"SELECT * FROM users")
+            .fetch_all(&self.pool)
+            .await
+            .unwrap();
+
+        match users.len() {
+            0 => Err(HttpError::NotFound("User not found")),
+            _ => {
+                Ok(users)
+            }
+        }
     }
 
-    async fn update_user(&self, id: i32, username: Option<String>, password: Option<String>, email: Option<String>) -> Result<User, String> {
-        let user = User {
-            id,
-            username: username.unwrap_or("user".to_string()),
-            password: password.unwrap_or("password".to_string()),
-            email: email.unwrap_or("email".to_string()),
-        };
-        Ok(user)
+    async fn create_user(&self, dto: CreateUserDto) -> Result<User, HttpError> {
+
+        // find existing user by email
+        let existing_user = sqlx::query_as!(User, "SELECT * FROM users WHERE email = ?", dto.email)
+            .fetch_optional(&self.pool)
+            .await
+            .unwrap();
+
+        match existing_user {
+            Some(_) => {
+                Err(HttpError::BadRequest("User already exists"))
+            }
+            None => {
+                // create new user
+                let user = sqlx::query(
+                    "INSERT INTO users (username, password, email) VALUES (?, ?, ?)"
+                )
+                    .bind(dto.username)
+                    .bind(dto.password)
+                    .bind(dto.email)
+                    .execute(&self.pool)
+                    .await
+                    .unwrap();
+
+                match user.last_insert_id() {
+                    0 => Err(HttpError::BadRequest("User not created")),
+                    _ => {
+                        let user = sqlx::query_as!(User, "SELECT * FROM users WHERE id = ?", user.last_insert_id())
+                            .fetch_one(&self.pool)
+                            .await
+                            .unwrap();
+                        Ok(user)
+                    }
+                }
+            }
+        }
     }
 
-    async fn delete_user(&self, id: i32) -> Result<String, String> {
-        Ok(format!("User with id {} has been deleted", id))
+    async fn get_user_by_id(&self, id: i32) -> Result<User, HttpError> {
+        let user = sqlx::query_as!(User,"SELECT * FROM users WHERE id = ?", id)
+            .fetch_optional(&self.pool)
+            .await
+            .unwrap();
+
+        match user {
+            Some(user) => {
+                Ok(user)
+            }
+            None => {
+                Err(HttpError::NotFound("User not found"))
+            }
+        }
+    }
+
+    async fn update_user(&self, id: i32, dto: UpdateUserDto) -> Result<User, HttpError> {
+        let user = sqlx::query(
+            "UPDATE users SET username = ?, password = ?, email = ? WHERE id = ?"
+        )
+            .bind(dto.username)
+            .bind(dto.password)
+            .bind(dto.email)
+            .bind(id)
+            .execute(&self.pool)
+            .await
+            .unwrap();
+
+        match user.rows_affected() {
+            0 => Err(HttpError::NotFound("User not found")),
+            _ => {
+                let user = sqlx::query_as!(User, "SELECT * FROM users WHERE id = ?", id)
+                    .fetch_one(&self.pool)
+                    .await
+                    .unwrap();
+                Ok(user)
+            }
+        }
+    }
+
+    async fn delete_user(&self, id: i32) -> Result<String, HttpError> {
+        let user = sqlx::query("DELETE FROM users WHERE id = ?")
+            .bind(id)
+            .execute(&self.pool)
+            .await
+            .unwrap();
+
+        match user.rows_affected() {
+            0 => Err(HttpError::NotFound("User not found")),
+            _ => {
+                Ok("User deleted successfully".to_string())
+            }
+        }
     }
 }

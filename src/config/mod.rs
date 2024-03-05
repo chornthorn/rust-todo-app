@@ -1,26 +1,23 @@
-use actix_web::{HttpResponse, Responder};
-use crate::shared::StdResponse;
+use actix_web::{Responder};
+use sqlx::{MySqlPool};
+use crate::shared::response::JsonResponder;
 
 #[derive(Debug, Clone)]
 pub struct AppConfig {
     pub name: String,
+    pub db_pool: MySqlPool,
 }
 
 impl AppConfig {
-    pub fn new(name: String) -> AppConfig {
-        AppConfig {
+    pub fn new(name: String, db_pool: MySqlPool) -> Self {
+        Self {
             name,
+            db_pool,
         }
     }
 }
 
 // handle route not found
 pub async fn route_not_found() -> impl Responder {
-    HttpResponse::NotFound().json({
-        let mut response = StdResponse::default();
-        response.message = "Route not found".to_string();
-        response.error = "not found".to_string();
-        response.status = 404;
-        response
-    })
+    JsonResponder::new_http("Route not found", 404, None)
 }
