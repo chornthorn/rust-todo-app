@@ -1,4 +1,5 @@
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 
 pub struct Regexes {}
 impl Regexes {
@@ -17,5 +18,22 @@ impl Regexes {
 
     pub fn id_regex() -> Regex {
         Regexes::new(r"^[0-9]+$")
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct StdResponse {
+    pub message: String,
+    pub error: String,
+    pub status: u16
+}
+
+impl Default for StdResponse {
+    fn default() -> Self {
+        StdResponse {
+            message: "Success".to_string(),
+            error: "".to_string(),
+            status: 200
+        }
     }
 }

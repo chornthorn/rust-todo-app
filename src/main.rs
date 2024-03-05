@@ -1,5 +1,7 @@
 use actix_web::{get, App, HttpServer, Responder, HttpResponse, web};
-use crate::config::AppConfig;
+use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
+use serde::{Deserialize, Serialize};
+use crate::config::{AppConfig, route_not_found};
 
 mod users;
 mod config;
@@ -40,9 +42,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move ||
         App::new()
+            .wrap(Logger::default())
+            .wrap(NormalizePath::new(TrailingSlash::Trim))
             .app_data(app_config.clone())
             .service(index)
             .configure(router_config)
+            .default_service(web::route().to(route_not_found))
         )
         .bind("0.0.0.0:8080")?
         .run()
