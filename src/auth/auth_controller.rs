@@ -1,9 +1,9 @@
-use actix_web::{post,get, web, Responder, HttpResponse};
 use crate::auth::auth_service::AuthService;
 use crate::auth::dto::{LoginDto, RegisterDto};
+use actix_web::{get, post, web, HttpResponse, Responder};
 
 #[post("/login")]
-async fn login(body: web::Json<LoginDto>) -> impl Responder{
+async fn login(body: web::Json<LoginDto>) -> impl Responder {
     AuthService::new().login(body.into_inner()).await
 }
 

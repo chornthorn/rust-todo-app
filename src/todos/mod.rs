@@ -1,11 +1,11 @@
+use crate::todos::todos_controller::{create_todo, delete_todo, get_all_todos, update_todo};
 use actix_web::web;
-use crate::todos::todos_controller::{get_all_todos, create_todo, update_todo, delete_todo};
 
-pub mod todos_controller;
-pub mod todos_service;
-pub mod todos_repository;
 pub mod dto;
 pub mod entities;
+pub mod todos_controller;
+pub mod todos_repository;
+pub mod todos_service;
 
 pub fn router(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -13,6 +13,6 @@ pub fn router(cfg: &mut web::ServiceConfig) {
             .service(get_all_todos)
             .service(create_todo)
             .service(update_todo)
-            .service(delete_todo)
+            .service(delete_todo),
     );
 }

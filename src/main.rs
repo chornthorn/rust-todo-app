@@ -1,13 +1,13 @@
-use actix_web::{get, App, HttpServer, Responder, HttpResponse, web};
+use crate::config::{route_not_found, AppConfig};
 use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
-use crate::config::{AppConfig, route_not_found};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder};
 use sqlx::mysql::MySqlPoolOptions;
 
-mod users;
+mod auth;
 mod config;
 mod shared;
 mod todos;
-mod auth;
+mod users;
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -23,13 +23,12 @@ fn router_config(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .configure(users::router)
             .configure(todos::router)
-            .configure(auth::router)
+            .configure(auth::router),
     );
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
     // load environment variables
     dotenv::dotenv().ok();
 
@@ -39,7 +38,7 @@ async fn main() -> std::io::Result<()> {
     env_logger::init();
 
     // create a database pool
-    let db_connection = match MySqlPoolOptions::new()
+    let pool = match MySqlPoolOptions::new()
         .max_connections(10)
         .connect(&std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
         .await
@@ -54,24 +53,20 @@ async fn main() -> std::io::Result<()> {
         }
     };
 
+    let app_config = AppConfig::new("Todo Backend", pool);
 
-    let app_config = AppConfig::new(
-        "Todo Backend",
-        db_connection,
-    );
-
-    HttpServer::new(move ||
+    HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .wrap(NormalizePath::new(TrailingSlash::Trim))
             .app_data(web::Data::new(AppConfig {
                 name: app_config.name,
-                db_pool: app_config.db_pool.clone(),
+                pool: app_config.pool.clone(),
             }))
             .configure(router_config)
             .default_service(web::route().to(route_not_found))
-        )
-        .bind("0.0.0.0:8080")?
-        .run()
-        .await
+    })
+    .bind("0.0.0.0:8080")?
+    .run()
+    .await
 }

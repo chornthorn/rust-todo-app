@@ -48,8 +48,16 @@ impl TodoRepository for InMemoryTodoRepository {
     async fn update(&self, id: i32, todo: UpdateTodoDto) -> Result<Todo, String> {
         Ok(Todo {
             id,
-            title: if let Some(title) = todo.title { title } else { "Todo 1".to_string() },
-            completed: if let Some(completed) = todo.completed { completed } else { false },
+            title: if let Some(title) = todo.title {
+                title
+            } else {
+                "Todo 1".to_string()
+            },
+            completed: if let Some(completed) = todo.completed {
+                completed
+            } else {
+                false
+            },
         })
     }
 

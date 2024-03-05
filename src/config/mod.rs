@@ -1,19 +1,16 @@
-use actix_web::Responder;
-use sqlx::{MySqlPool};
 use crate::shared::response::JsonResponder;
+use actix_web::Responder;
+use sqlx::MySqlPool;
 
 #[derive(Debug, Clone)]
 pub struct AppConfig {
     pub name: &'static str,
-    pub db_pool: MySqlPool,
+    pub pool: MySqlPool,
 }
 
 impl AppConfig {
-    pub fn new(name: &'static str, db_pool: MySqlPool) -> Self {
-        Self {
-            name,
-            db_pool,
-        }
+    pub fn new(name: &'static str, pool: MySqlPool) -> Self {
+        Self { name, pool }
     }
 }
 

@@ -1,10 +1,9 @@
-use actix_web::{delete, get, post, web, Responder, patch};
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::todos_service::TodosService;
-
+use actix_web::{delete, get, patch, post, web, Responder};
 
 #[get("/")]
-async fn get_all_todos() -> impl  Responder {
+async fn get_all_todos() -> impl Responder {
     let service = TodosService::new();
     service.get_all().await
 }

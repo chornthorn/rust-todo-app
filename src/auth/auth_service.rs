@@ -1,5 +1,5 @@
-use actix_web::HttpResponse;
 use crate::auth::dto::{LoginDto, RegisterDto};
+use actix_web::HttpResponse;
 
 pub struct AuthService {}
 
@@ -27,7 +27,6 @@ impl AuthService {
             HttpResponse::Unauthorized().json("Invalid email")
         }
     }
-
 
     pub async fn refresh_token(&self, email: &str) -> HttpResponse {
         if email == "thorn@gmail.com" {

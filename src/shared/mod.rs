@@ -5,7 +5,6 @@ use regex::Regex;
 
 pub struct Regexes {}
 impl Regexes {
-
     pub fn new(pattern: &str) -> Regex {
         Regex::new(pattern).unwrap()
     }

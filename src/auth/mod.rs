@@ -1,10 +1,10 @@
-use actix_web::web;
 use crate::auth::auth_controller::{login, logout, refresh_token, register, user_info};
+use actix_web::web;
 
-pub mod dto;
 pub mod auth_controller;
-pub mod auth_service;
 pub mod auth_repository;
+pub mod auth_service;
+pub mod dto;
 
 pub fn router(cfg: &mut web::ServiceConfig) {
     cfg.service(
@@ -13,6 +13,6 @@ pub fn router(cfg: &mut web::ServiceConfig) {
             .service(register)
             .service(refresh_token)
             .service(user_info)
-            .service(logout)
+            .service(logout),
     );
 }
