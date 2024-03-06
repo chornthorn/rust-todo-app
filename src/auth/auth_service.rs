@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use crate::auth::dto::{LoginDto, RegisterDto};
 use actix_web::HttpResponse;
 use chrono::{Duration, Utc};
@@ -138,7 +136,7 @@ impl AuthService {
     pub async fn generate_token(&self, user_id: u32) -> (String, String) {
         let now = Utc::now();
         let iat = now.timestamp() as usize;
-        let exp = (now + Duration::minutes(1)).timestamp() as usize;
+        let exp = (now + Duration::minutes(60)).timestamp() as usize;
         let claims: TokenClaims = TokenClaims {
             sub: user_id,
             exp,

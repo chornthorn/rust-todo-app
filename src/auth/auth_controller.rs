@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use crate::auth::auth_service::AuthService;
 use crate::auth::dto::{LoginDto, RegisterDto};
 use actix_web::{get, post, web, HttpResponse, Responder, HttpRequest, HttpMessage};

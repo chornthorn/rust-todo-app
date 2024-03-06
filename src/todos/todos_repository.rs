@@ -1,67 +1,106 @@
+use sqlx::{MySql, Pool};
+use crate::shared::constant::HttpError;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::entities::Todo;
 
 pub trait TodoRepository {
-    async fn get_all(&self) -> Result<Vec<Todo>, String>;
-    async fn get_by_id(&self, id: i32) -> Result<Todo, String>;
-    async fn create(&self, todo: CreateTodoDto) -> Result<Todo, String>;
-    async fn update(&self, id: i32, todo: UpdateTodoDto) -> Result<Todo, String>;
-    async fn delete(&self, id: i32) -> Result<(), String>;
+    fn new(pool: Pool<MySql>) -> Self;
+    async fn find_all(&self) -> Result<Vec<Todo>, HttpError>;
+    async fn find_one_by_id(&self, id: u32) -> Result<Todo, HttpError>;
+    async fn create(&self, todo: CreateTodoDto) -> Result<Todo, HttpError>;
+    async fn update(&self, id: u32, todo: UpdateTodoDto) -> Result<Todo, HttpError>;
+    async fn delete(&self, id: u32) -> Result<(), HttpError>;
 }
 
-pub struct InMemoryTodoRepository {}
+pub struct MysqlTodoRepository {
+    pool: sqlx::MySqlPool,
+}
 
-impl TodoRepository for InMemoryTodoRepository {
-    async fn get_all(&self) -> Result<Vec<Todo>, String> {
-        let todos = vec![
-            Todo {
-                id: 1,
-                title: "Todo 1".to_string(),
-                completed: false,
-            },
-            Todo {
-                id: 2,
-                title: "Todo 2".to_string(),
-                completed: true,
-            },
-        ];
-
-        Ok(todos)
+impl TodoRepository for MysqlTodoRepository {
+    fn new(pool: Pool<MySql>) -> Self {
+        MysqlTodoRepository { pool }
     }
 
-    async fn get_by_id(&self, id: i32) -> Result<Todo, String> {
-        Ok(Todo {
-            id,
-            title: "Todo 1".to_string(),
-            completed: false,
-        })
+    async fn find_all(&self) -> Result<Vec<Todo>, HttpError> {
+        let todos = sqlx::query_as!(Todo, "SELECT * FROM todos")
+            .fetch_all(&self.pool)
+            .await
+            .unwrap();
+
+        match todos.len() {
+            0 => Err(HttpError::NotFound("Todo not found")),
+            _ => Ok(todos),
+        }
     }
 
-    async fn create(&self, todo: CreateTodoDto) -> Result<Todo, String> {
-        Ok(Todo {
-            id: 3,
-            title: todo.title,
-            completed: false,
-        })
+    async fn find_one_by_id(&self, id: u32) -> Result<Todo, HttpError> {
+        let todo = sqlx::query_as!(Todo, "SELECT * FROM todos WHERE id = ?", id)
+            .fetch_optional(&self.pool)
+            .await
+            .unwrap();
+
+        match todo {
+            Some(todo) => Ok(todo),
+            None => Err(HttpError::NotFound("Todo not found")),
+        }
     }
 
-    async fn update(&self, id: i32, todo: UpdateTodoDto) -> Result<Todo, String> {
-        Ok(Todo {
-            id,
-            title: if let Some(title) = todo.title {
-                title
-            } else {
-                "Todo 1".to_string()
+    async fn create(&self, todo: CreateTodoDto) -> Result<Todo, HttpError> {
+        let new_todo = sqlx::query_as!(Todo,
+            "INSERT INTO todos (title, completed) VALUES (?, ?)",
+            todo.title, todo.completed
+        )
+            .execute(&self.pool)
+            .await
+            .unwrap();
+
+        match new_todo.last_insert_id() {
+            0 => Err(HttpError::BadRequest("Todo not created")),
+            _ => {
+                let todo = sqlx::query_as!(Todo, "SELECT * FROM todos WHERE id = ?", new_todo.last_insert_id())
+                    .fetch_one(&self.pool)
+                    .await
+                    .unwrap();
+                Ok(todo)
+            }
+        }
+    }
+
+    async fn update(&self, id: u32, todo: UpdateTodoDto) -> Result<Todo, HttpError> {
+        let updated_todo = sqlx::query(
+            "UPDATE todos SET title = ?, completed = ? WHERE id = ?"
+        )
+            .bind(todo.title)
+            .bind(todo.completed)
+            .bind(id)
+            .execute(&self.pool)
+            .await;
+
+        match updated_todo {
+            Ok(_) => {
+                let todo = sqlx::query_as!(Todo, "SELECT * FROM todos WHERE id = ?", id)
+                    .fetch_one(&self.pool)
+                    .await
+                    .unwrap();
+                Ok(todo)
+            }
+            Err(error) => {
+                println!("{:?}", error);
+                Err(HttpError::BadRequest("Todo not updated"))
             },
-            completed: if let Some(completed) = todo.completed {
-                completed
-            } else {
-                false
-            },
-        })
+        }
     }
 
-    async fn delete(&self, _id: i32) -> Result<(), String> {
-        Ok(())
+    async fn delete(&self, id: u32) -> Result<(), HttpError> {
+        let deleted_todo = sqlx::query("DELETE FROM todos WHERE id = ?")
+            .bind(id)
+            .execute(&self.pool)
+            .await
+            .unwrap();
+
+        match deleted_todo.rows_affected() {
+            0 => Err(HttpError::NotFound("Todo not found")),
+            _ => Ok(()),
+        }
     }
 }
