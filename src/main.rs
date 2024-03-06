@@ -12,6 +12,7 @@ use actix_web::{
 use futures::TryFutureExt;
 use sqlx::mysql::MySqlPoolOptions;
 use std::error::Error;
+use actix_cors::Cors;
 
 mod auth;
 mod config;
@@ -75,7 +76,20 @@ async fn main() -> std::io::Result<()> {
         });
 
     HttpServer::new(move || {
+
+        // cors configuration
+        let cors = Cors::default()
+            .allowed_origin("http://localhost:3000")
+            .allowed_methods(vec!["GET", "POST", "PUT", "DELETE", "PATCH"])
+            .allowed_headers(vec![
+                actix_web::http::header::AUTHORIZATION,
+                actix_web::http::header::ACCEPT,
+                actix_web::http::header::CONTENT_TYPE,
+            ])
+            .max_age(3600);
+
         App::new()
+            .wrap(cors)
             .wrap(Authentication)
             .wrap(Logger::default())
             .wrap(NormalizePath::new(TrailingSlash::Trim))
