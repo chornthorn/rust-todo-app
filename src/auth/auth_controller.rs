@@ -2,10 +2,13 @@
 
 use crate::auth::auth_service::AuthService;
 use crate::auth::dto::{LoginDto, RegisterDto};
-use actix_web::{get, post, web, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpResponse, Responder, HttpRequest, HttpMessage};
 use validator::Validate;
 use crate::config::AppConfig;
+use crate::shared::jwt_middleware::JwtMiddleware;
+use crate::shared::jwt_refresh_token::JwtRefreshToken;
 use crate::shared::response::JsonResponder;
+use crate::shared::token_claim::TokenClaims;
 
 #[post("login")]
 async fn login(body: web::Json<LoginDto>, data: web::Data<AppConfig>) -> impl Responder {
@@ -25,15 +28,16 @@ async fn register(dto: web::Json<RegisterDto>, data: web::Data<AppConfig>) -> im
 
 #[post("/logout")]
 async fn logout() -> impl Responder {
-    HttpResponse::Ok().json("Logout")
+    JsonResponder::ok("Logout successful",None)
 }
 
-#[post("/refresh-token")]
-async fn refresh_token() -> impl Responder {
-    HttpResponse::Ok().json("Refresh")
+#[post("/token/refresh")]
+async fn refresh_token(data: web::Data<AppConfig>, token: JwtRefreshToken) -> impl Responder {
+    AuthService::new(data.pool.clone()).refresh_token(token.user_id).await
 }
 
 #[get("/user/info")]
-async fn user_info() -> impl Responder {
-    HttpResponse::Ok().json("User Info")
+async fn user_info(data: web::Data<AppConfig>,req: HttpRequest) -> impl Responder {
+    let user_id = req.extensions().get::<TokenClaims>().unwrap().sub;
+    AuthService::new(data.pool.clone()).user_info(user_id).await
 }

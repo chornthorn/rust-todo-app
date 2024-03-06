@@ -8,9 +8,19 @@ use validator::ValidationErrors;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonResponder {
-    message: &'static str,
+    pub message: &'static str,
     status: u16,
     data: Option<serde_json::Value>,
+}
+
+impl std::fmt::Display for JsonResponder {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            serde_json::to_string(&self).unwrap_or("".to_string())
+        )
+    }
 }
 
 impl JsonResponder {

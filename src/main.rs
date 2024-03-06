@@ -3,9 +3,12 @@
 use std::error::Error;
 use crate::config::{route_not_found, AppConfig};
 use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, error, ResponseError};
+use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, error, ResponseError, guard, dev};
+use actix_web::guard::{Guard, GuardContext};
 use futures::TryFutureExt;
 use sqlx::mysql::MySqlPoolOptions;
+use crate::shared::auth_middleware::Authentication;
+use crate::shared::jwt_middleware::JwtMiddleware;
 use crate::shared::response::JsonResponder;
 
 mod auth;
@@ -71,6 +74,7 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(Authentication)
             .wrap(Logger::default())
             .wrap(NormalizePath::new(TrailingSlash::Trim))
             .app_data(web::Data::new(AppConfig {
@@ -80,6 +84,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(json_cfg.clone())
             .configure(router_config)
             .default_service(web::route().to(route_not_found))
+            .service(index)
     })
         .workers(2)
         .bind("0.0.0.0:8080")?

@@ -2,7 +2,6 @@ use crate::auth::auth_controller::{login, logout, refresh_token, register, user_
 use actix_web::web;
 
 pub mod auth_controller;
-pub mod auth_repository;
 pub mod auth_service;
 pub mod dto;
 
