@@ -1,7 +1,7 @@
-use sqlx::{MySql, Pool};
 use crate::shared::constant::HttpError;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::entities::Todo;
+use sqlx::{MySql, Pool};
 
 pub trait TodoRepository {
     fn new(pool: Pool<MySql>) -> Self;
@@ -46,30 +46,34 @@ impl TodoRepository for MysqlTodoRepository {
     }
 
     async fn create(&self, todo: CreateTodoDto) -> Result<Todo, HttpError> {
-        let new_todo = sqlx::query_as!(Todo,
+        let new_todo = sqlx::query_as!(
+            Todo,
             "INSERT INTO todos (title, completed) VALUES (?, ?)",
-            todo.title, todo.completed
+            todo.title,
+            todo.completed
         )
-            .execute(&self.pool)
-            .await
-            .unwrap();
+        .execute(&self.pool)
+        .await
+        .unwrap();
 
         match new_todo.last_insert_id() {
             0 => Err(HttpError::BadRequest("Todo not created")),
             _ => {
-                let todo = sqlx::query_as!(Todo, "SELECT * FROM todos WHERE id = ?", new_todo.last_insert_id())
-                    .fetch_one(&self.pool)
-                    .await
-                    .unwrap();
+                let todo = sqlx::query_as!(
+                    Todo,
+                    "SELECT * FROM todos WHERE id = ?",
+                    new_todo.last_insert_id()
+                )
+                .fetch_one(&self.pool)
+                .await
+                .unwrap();
                 Ok(todo)
             }
         }
     }
 
     async fn update(&self, id: u32, todo: UpdateTodoDto) -> Result<Todo, HttpError> {
-        let updated_todo = sqlx::query(
-            "UPDATE todos SET title = ?, completed = ? WHERE id = ?"
-        )
+        let updated_todo = sqlx::query("UPDATE todos SET title = ?, completed = ? WHERE id = ?")
             .bind(todo.title)
             .bind(todo.completed)
             .bind(id)
@@ -87,7 +91,7 @@ impl TodoRepository for MysqlTodoRepository {
             Err(error) => {
                 println!("{:?}", error);
                 Err(HttpError::BadRequest("Todo not updated"))
-            },
+            }
         }
     }
 

@@ -1,17 +1,17 @@
 #![allow(unused)]
 
-pub mod constant;
-pub mod response;
-pub mod bcrypt_helper;
-pub mod token_claim;
-pub mod jwt_middleware;
 pub mod auth_middleware;
-pub mod router;
+pub mod bcrypt_helper;
+pub mod constant;
+pub mod jwt_middleware;
 pub mod jwt_refresh_token;
+pub mod response;
+pub mod router;
+pub mod token_claim;
 
+use crate::shared::jwt_middleware::JwtMiddleware;
 use actix_web::Responder;
 use regex::Regex;
-use crate::shared::jwt_middleware::JwtMiddleware;
 
 pub struct Regexes {}
 impl Regexes {

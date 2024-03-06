@@ -1,5 +1,5 @@
 use actix_web::HttpMessage;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TokenClaims {

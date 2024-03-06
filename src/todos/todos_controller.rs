@@ -1,9 +1,9 @@
+use crate::config::AppConfig;
+use crate::shared::response::JsonResponder;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::todos_service::TodosService;
 use actix_web::{delete, get, patch, post, web, Responder};
 use validator::{Validate, ValidationErrors};
-use crate::config::AppConfig;
-use crate::shared::response::JsonResponder;
 
 #[get("")]
 async fn get_all_todos(data: web::Data<AppConfig>) -> impl Responder {
@@ -24,7 +24,7 @@ async fn create_todo(body: web::Json<CreateTodoDto>, data: web::Data<AppConfig>)
             let service = TodosService::new(data.pool.clone());
             service.create(body.into_inner()).await
         }
-        Err(error) => JsonResponder::validation_error(error)
+        Err(error) => JsonResponder::validation_error(error),
     }
 }
 
@@ -35,7 +35,11 @@ async fn delete_todo(id: web::Path<u32>, data: web::Data<AppConfig>) -> impl Res
 }
 
 #[patch("{id}")]
-async fn update_todo(id: web::Path<u32>, body: web::Json<UpdateTodoDto>, data: web::Data<AppConfig>) -> impl Responder {
+async fn update_todo(
+    id: web::Path<u32>,
+    body: web::Json<UpdateTodoDto>,
+    data: web::Data<AppConfig>,
+) -> impl Responder {
     let service = TodosService::new(data.pool.clone());
     service.update(id.into_inner(), body.into_inner()).await
 }

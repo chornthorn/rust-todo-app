@@ -17,6 +17,6 @@ pub fn router(cfg: &mut web::ServiceConfig) {
             .service(create_user)
             .service(get_user_by_id)
             .service(update_user)
-            .service(delete_user)
+            .service(delete_user),
     );
 }

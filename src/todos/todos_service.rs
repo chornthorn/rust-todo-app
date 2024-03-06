@@ -1,7 +1,7 @@
-use crate::todos::todos_repository::{MysqlTodoRepository, TodoRepository};
-use actix_web::HttpResponse;
 use crate::shared::response::JsonResponder;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
+use crate::todos::todos_repository::{MysqlTodoRepository, TodoRepository};
+use actix_web::HttpResponse;
 
 pub struct TodosService {
     pool: sqlx::MySqlPool,

@@ -1,15 +1,15 @@
 use crate::auth::dto::{LoginDto, RegisterDto};
+use crate::shared::bcrypt_helper::BcryptHelper;
+use crate::shared::response::JsonResponder;
+use crate::shared::token_claim::TokenClaims;
+use crate::users::dto::CreateUserDto;
+use crate::users::users_repository::{UserRepository, UsersRepository};
+use crate::users::users_service::UsersService;
 use actix_web::HttpResponse;
 use chrono::{Duration, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 use sqlx::MySqlPool;
-use crate::shared::response::JsonResponder;
-use crate::shared::bcrypt_helper::BcryptHelper;
-use crate::shared::token_claim::TokenClaims;
-use crate::users::dto::CreateUserDto;
-use crate::users::users_repository::{UserRepository, UsersRepository};
-use crate::users::users_service::UsersService;
 
 pub struct AuthService {
     pool: MySqlPool,
@@ -24,7 +24,6 @@ impl AuthService {
         UsersRepository::new(self.pool.clone())
     }
 
-
     pub async fn login(self, login: LoginDto) -> HttpResponse {
         let repository = self.user_repository();
         let user = repository.get_user_by_email(login.email).await;
@@ -35,8 +34,8 @@ impl AuthService {
                     let (access_token, refresh_token) = self.generate_token(user.id).await;
                     JsonResponder::ok(
                         "User logged in successfully",
-                        Some(serde_json::to_value(
-                            json!(
+                        Some(
+                            serde_json::to_value(json!(
                                 {
                                     "token": {
                                         "access_token": access_token,
@@ -44,8 +43,9 @@ impl AuthService {
                                     },
                                     "user": user,
                                 }
-                            )
-                        ).unwrap()),
+                            ))
+                            .unwrap(),
+                        ),
                     )
                 } else {
                     JsonResponder::bad_request("Invalid password")
@@ -57,7 +57,9 @@ impl AuthService {
 
     pub async fn register(self, register_dto: RegisterDto) -> HttpResponse {
         let repository = self.user_repository();
-        let user = repository.get_user_by_email(register_dto.email.clone()).await;
+        let user = repository
+            .get_user_by_email(register_dto.email.clone())
+            .await;
 
         if user.is_ok() {
             return JsonResponder::bad_request("User already exists");
@@ -77,15 +79,16 @@ impl AuthService {
                         let (access_token, refresh_token) = self.generate_token(user.id).await;
                         JsonResponder::ok(
                             "User signed up successfully",
-                            Some(serde_json::to_value(
-                                json!({
+                            Some(
+                                serde_json::to_value(json!({
                                     "token": {
                                         "access_token": access_token,
                                         "refresh_token": refresh_token
                                     },
                                     "user": user,
-                                })
-                            ).unwrap()),
+                                }))
+                                .unwrap(),
+                            ),
                         )
                     }
                     Err(err) => JsonResponder::match_err(err),
@@ -104,8 +107,8 @@ impl AuthService {
                 let (access_token, refresh_token) = self.generate_token(user.id).await;
                 JsonResponder::ok(
                     "Token refreshed successfully",
-                    Some(serde_json::to_value(
-                        json!(
+                    Some(
+                        serde_json::to_value(json!(
                             {
                                 "token": {
                                     "access_token": access_token,
@@ -113,8 +116,9 @@ impl AuthService {
                                 },
                                 "user": user,
                             }
-                        )
-                    ).unwrap()),
+                        ))
+                        .unwrap(),
+                    ),
                 )
             }
             Err(e) => JsonResponder::match_err(e),
@@ -125,9 +129,7 @@ impl AuthService {
         let repository = self.user_repository();
         let user = repository.get_user_by_id(user_id).await;
         match user {
-            Ok(user) => {
-                JsonResponder::ok("User info", Some(serde_json::to_value(user).unwrap()))
-            }
+            Ok(user) => JsonResponder::ok("User info", Some(serde_json::to_value(user).unwrap())),
             Err(e) => JsonResponder::match_err(e),
         }
     }
@@ -143,14 +145,14 @@ impl AuthService {
             iat,
         };
 
-        let access_secret = std::env::var("ACCESS_TOKEN_SECRET")
-            .expect("ACCESS_TOKEN_SECRET must be set");
+        let access_secret =
+            std::env::var("ACCESS_TOKEN_SECRET").expect("ACCESS_TOKEN_SECRET must be set");
         let access_token = encode(
             &Header::default(),
             &claims,
             &EncodingKey::from_secret(access_secret.as_ref()),
         )
-            .unwrap();
+        .unwrap();
 
         let now = Utc::now();
         let iat = now.timestamp() as usize;
@@ -161,14 +163,14 @@ impl AuthService {
             iat,
         };
 
-        let refresh_secret = std::env::var("REFRESH_TOKEN_SECRET")
-            .expect("REFRESH_TOKEN_SECRET must be set");
+        let refresh_secret =
+            std::env::var("REFRESH_TOKEN_SECRET").expect("REFRESH_TOKEN_SECRET must be set");
         let refresh_token = encode(
             &Header::default(),
             &claims,
             &EncodingKey::from_secret(refresh_secret.as_ref()),
         )
-            .unwrap();
+        .unwrap();
 
         (access_token, refresh_token)
     }

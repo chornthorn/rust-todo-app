@@ -1,10 +1,10 @@
+use crate::shared::bcrypt_helper::BcryptHelper;
 use crate::shared::response::JsonResponder;
 use crate::users::dto::CreateUserDto;
 use crate::users::dto::UpdateUserDto;
 use crate::users::users_repository::{UserRepository, UsersRepository};
 use actix_web::{HttpResponse, Responder};
 use sqlx::MySqlPool;
-use crate::shared::bcrypt_helper::BcryptHelper;
 
 pub struct UsersService {
     pool: MySqlPool,
@@ -50,7 +50,7 @@ impl UsersService {
                     ),
                     Err(err) => JsonResponder::match_err(err),
                 }
-            },
+            }
             Err(_) => JsonResponder::bad_request("Something went wrong."),
         }
     }
@@ -99,5 +99,4 @@ impl UsersService {
             Err(err) => JsonResponder::match_err(err),
         }
     }
-
 }

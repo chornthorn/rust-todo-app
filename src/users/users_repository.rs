@@ -9,7 +9,7 @@ pub trait UserRepository {
     async fn create_user(&self, dto: CreateUserDto) -> Result<User, HttpError>;
     async fn get_user_by_id(&self, id: u32) -> Result<User, HttpError>;
     async fn update_user(&self, id: i32, update_user_dto: UpdateUserDto)
-                         -> Result<User, HttpError>;
+        -> Result<User, HttpError>;
     async fn delete_user(&self, id: i32) -> Result<String, HttpError>;
     async fn get_user_by_email(&self, email: String) -> Result<User, HttpError>;
 }
@@ -64,9 +64,9 @@ impl UserRepository for UsersRepository {
                             "SELECT * FROM users WHERE id = ?",
                             user.last_insert_id()
                         )
-                            .fetch_one(&self.pool)
-                            .await
-                            .unwrap();
+                        .fetch_one(&self.pool)
+                        .await
+                        .unwrap();
                         Ok(user)
                     }
                 }
@@ -123,10 +123,7 @@ impl UserRepository for UsersRepository {
     }
 
     async fn get_user_by_email(&self, email: String) -> Result<User, HttpError> {
-        let user = sqlx::query_as!(
-            User,"SELECT * FROM users WHERE email = ?",
-            email
-        )
+        let user = sqlx::query_as!(User, "SELECT * FROM users WHERE email = ?", email)
             .fetch_optional(&self.pool)
             .await
             .unwrap();

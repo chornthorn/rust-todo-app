@@ -1,15 +1,17 @@
 #![allow(unused)]
 
-use std::error::Error;
 use crate::config::{route_not_found, AppConfig};
-use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
-use actix_web::{get, web, App, HttpResponse, HttpServer, Responder, error, ResponseError, guard, dev};
-use actix_web::guard::{Guard, GuardContext};
-use futures::TryFutureExt;
-use sqlx::mysql::MySqlPoolOptions;
 use crate::shared::auth_middleware::Authentication;
 use crate::shared::jwt_middleware::JwtMiddleware;
 use crate::shared::response::JsonResponder;
+use actix_web::guard::{Guard, GuardContext};
+use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
+use actix_web::{
+    dev, error, get, guard, web, App, HttpResponse, HttpServer, Responder, ResponseError,
+};
+use futures::TryFutureExt;
+use sqlx::mysql::MySqlPoolOptions;
+use std::error::Error;
 
 mod auth;
 mod config;

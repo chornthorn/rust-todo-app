@@ -1,9 +1,8 @@
 use serde::{Deserialize, Serialize};
 use validator::Validate;
 
-#[derive(Debug, Serialize, Deserialize, Clone,Validate)]
+#[derive(Debug, Serialize, Deserialize, Clone, Validate)]
 pub struct CreateTodoDto {
-
     #[validate(length(min = 1, max = 255))]
     pub title: String,
 

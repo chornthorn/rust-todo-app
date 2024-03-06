@@ -2,7 +2,7 @@ use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 
-#[derive(Debug, Serialize, Deserialize, Clone,FromRow)]
+#[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct Todo {
     pub id: u32,
     pub title: String,
