@@ -1,7 +1,7 @@
-use crate::shared::constant::HttpError;
 use crate::users::dto::{CreateUserDto, UpdateUserDto};
 use crate::users::entities::User;
 use sqlx::{MySql, MySqlPool, Pool};
+use crate::shared::http_error::HttpError;
 
 pub trait UserRepository {
     fn new(pool: Pool<MySql>) -> Self;

@@ -1,11 +1,11 @@
 use crate::shared::response::JsonResponder;
-use crate::shared::token_claim::TokenClaims;
 use actix_web::error::ErrorUnauthorized;
 use actix_web::{dev::Payload, Error as ActixWebError};
 use actix_web::{http, web, FromRequest, HttpMessage, HttpRequest};
 use jsonwebtoken::{decode, DecodingKey, Validation};
 use serde::Serialize;
 use std::future::{ready, Ready};
+use crate::shared::constant::TokenClaims;
 
 pub struct JwtMiddleware {
     pub user_id: u32,

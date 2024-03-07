@@ -1,6 +1,4 @@
 use crate::shared::response::JsonResponder;
-use crate::shared::router::PublicRouter;
-use crate::shared::token_claim::TokenClaims;
 use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::error::ErrorUnauthorized;
 use actix_web::Error;
@@ -12,6 +10,7 @@ use std::fmt;
 use std::fmt::{Display, Formatter};
 use std::pin::Pin;
 use std::task::{Context, Poll};
+use crate::shared::constant::{PublicRouter, TokenClaims};
 
 impl ResponseError for JsonResponder {
     fn error_response(&self) -> HttpResponse {

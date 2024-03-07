@@ -3,9 +3,9 @@ use crate::auth::dto::{LoginDto, RegisterDto};
 use crate::config::AppConfig;
 use crate::shared::jwt_refresh_token::JwtRefreshToken;
 use crate::shared::response::JsonResponder;
-use crate::shared::token_claim::TokenClaims;
 use actix_web::{get, post, web, HttpMessage, HttpRequest, Responder};
 use validator::Validate;
+use crate::shared::constant::TokenClaims;
 
 #[post("login")]
 async fn login(body: web::Json<LoginDto>, data: web::Data<AppConfig>) -> impl Responder {

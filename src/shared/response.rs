@@ -1,10 +1,10 @@
 #![allow(unused)]
 
-use crate::shared::constant::HttpError;
 use actix_web::http::StatusCode;
 use actix_web::HttpResponse;
 use serde::{Deserialize, Serialize};
 use validator::ValidationErrors;
+use crate::shared::http_error::HttpError;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct JsonResponder {

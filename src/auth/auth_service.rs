@@ -1,7 +1,6 @@
 use crate::auth::dto::{LoginDto, RegisterDto};
 use crate::shared::bcrypt_helper::BcryptHelper;
 use crate::shared::response::JsonResponder;
-use crate::shared::token_claim::TokenClaims;
 use crate::users::dto::CreateUserDto;
 use crate::users::users_repository::{UserRepository, UsersRepository};
 use actix_web::HttpResponse;
@@ -9,6 +8,7 @@ use chrono::{TimeDelta, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 use sqlx::MySqlPool;
+use crate::shared::constant::TokenClaims;
 use crate::users::entities::User;
 
 pub struct AuthService {
@@ -136,7 +136,6 @@ impl AuthService {
         refresh_token: String,
         user: User,
     ) -> serde_json::Value {
-
         serde_json::to_value(json!(
             {
                 "token": {

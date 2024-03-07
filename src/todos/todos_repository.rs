@@ -1,7 +1,7 @@
-use crate::shared::constant::HttpError;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::entities::Todo;
 use sqlx::{MySql, Pool};
+use crate::shared::http_error::HttpError;
 use crate::shared::paginated::{PaginatedRequest, PaginatedResponse};
 
 pub trait TodoRepository {

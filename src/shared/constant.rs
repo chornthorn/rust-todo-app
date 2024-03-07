@@ -1,36 +1,29 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, PartialOrd, PartialEq, Serialize, Deserialize)]
-pub enum HttpError {
-    NotFound(&'static str),
-    InternalServerError(&'static str),
-    BadRequest(&'static str),
-    Unauthorized(&'static str),
-    UnprocessableEntity(&'static str),
+pub struct PublicRouter {
+    pub routes: Vec<String>,
 }
 
-impl From<sqlx::Error> for HttpError {
-    fn from(err: sqlx::Error) -> Self {
-        match err {
-            sqlx::Error::RowNotFound => HttpError::NotFound("not_found"),
-            _ => HttpError::InternalServerError("internal_server_error"),
+impl PublicRouter {
+    pub fn new() -> Self {
+        Self {
+            routes: vec![
+                "/".to_string(),
+                "/api/auth/login".to_string(),
+                "/api/auth/register".to_string(),
+                "/api/auth/token/refresh".to_string(),
+            ],
         }
+    }
+
+    pub fn is_public_route(&self, path: &str) -> bool {
+        self.routes.contains(&path.to_string())
     }
 }
 
-// implement message for HttpError
-impl std::fmt::Display for HttpError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        match self {
-            HttpError::NotFound(message) => write!(f, "Not found: {}", message),
-            HttpError::InternalServerError(message) => {
-                write!(f, "Internal server error: {}", message)
-            }
-            HttpError::BadRequest(message) => write!(f, "Bad request: {}", message),
-            HttpError::Unauthorized(message) => write!(f, "Unauthorized: {}", message),
-            HttpError::UnprocessableEntity(message) => {
-                write!(f, "Unprocessable entity: {}", message)
-            }
-        }
-    }
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TokenClaims {
+    pub sub: u32,
+    pub iat: usize,
+    pub exp: usize,
 }
