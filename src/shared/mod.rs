@@ -8,6 +8,7 @@ pub mod jwt_refresh_token;
 pub mod response;
 pub mod router;
 pub mod token_claim;
+pub mod paginated;
 
 use crate::shared::jwt_middleware::JwtMiddleware;
 use actix_web::Responder;

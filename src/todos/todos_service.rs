@@ -2,6 +2,7 @@ use crate::shared::response::JsonResponder;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::todos_repository::{MysqlTodoRepository, TodoRepository};
 use actix_web::HttpResponse;
+use crate::shared::paginated::PaginatedRequest;
 
 pub struct TodosService {
     pool: sqlx::MySqlPool,
@@ -16,9 +17,9 @@ impl TodosService {
         MysqlTodoRepository::new(self.pool.clone())
     }
 
-    pub async fn find_all(&self) -> HttpResponse {
+    pub async fn find_all(&self,pagination: Option<PaginatedRequest>) -> HttpResponse {
         let repository = self.repository();
-        match repository.find_all().await {
+        match repository.find_all(pagination).await {
             Ok(todos) => JsonResponder::ok(
                 "Retrieved todos successfully",
                 Some(serde_json::to_value(todos).unwrap()),

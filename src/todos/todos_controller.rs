@@ -4,11 +4,24 @@ use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::todos_service::TodosService;
 use actix_web::{delete, get, patch, post, web, Responder};
 use validator::Validate;
+use crate::shared::paginated::PaginatedRequest;
 
 #[get("")]
-async fn get_all_todos(data: web::Data<AppConfig>) -> impl Responder {
+async fn get_all_todos(data: web::Data<AppConfig>, query: web::Query<PaginatedRequest>) -> impl Responder {
     let service = TodosService::new(data.pool.clone());
-    service.find_all().await
+
+    // validate the query parameters
+    match query.validate() {
+        Ok(_) => (),
+        Err(error) => return JsonResponder::validation_error(error),
+    };
+
+    let pagination = PaginatedRequest::size_only(
+        query.page,
+        query.limit,
+    );
+
+    service.find_all(Some(pagination)).await
 }
 
 #[get("{id}")]

@@ -99,8 +99,8 @@ impl AuthService {
         let user = repository.get_user_by_id(user_id).await;
         match user {
             Ok(user) => JsonResponder::ok(
-                "User info", 
-                Some(serde_json::to_value(user).unwrap())
+                "User info",
+                Some(serde_json::to_value(user).unwrap()),
             ),
             Err(e) => JsonResponder::match_err(e),
         }
@@ -136,13 +136,19 @@ impl AuthService {
         refresh_token: String,
         user: User,
     ) -> serde_json::Value {
+
         serde_json::to_value(json!(
             {
                 "token": {
                     "access_token": access_token,
                     "refresh_token": refresh_token
                 },
-                "user": user
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                    "created_at": user.created_at,
+                }
             }
         )).unwrap()
     }
