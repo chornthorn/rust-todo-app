@@ -1,0 +1,58 @@
+{
+  "db_name": "MySQL",
+  "query": "SELECT * FROM todos LIMIT ? OFFSET ?",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": {
+          "type": "Long",
+          "flags": "NOT_NULL | PRIMARY_KEY | UNSIGNED | AUTO_INCREMENT",
+          "char_set": 63,
+          "max_size": 10
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "title",
+        "type_info": {
+          "type": "VarString",
+          "flags": "NOT_NULL | NO_DEFAULT_VALUE",
+          "char_set": 224,
+          "max_size": 1020
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "completed",
+        "type_info": {
+          "type": "Tiny",
+          "flags": "NOT_NULL",
+          "char_set": 63,
+          "max_size": 1
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": {
+          "type": "Timestamp",
+          "flags": "BINARY | TIMESTAMP",
+          "char_set": 63,
+          "max_size": 19
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "be957f87b0d448e1aa2ec38def79daad1a555c3f569b8a6a5e696ffeebd63eef"
+}

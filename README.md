@@ -4,6 +4,21 @@
 
 This is a simple todo API built with Rust and Actix-Web. It uses MySQL database to store the todos.
 
+## Features
+
+- Authentication
+  - Register
+  - Login
+  - Refresh token
+  - Logout
+  - (The API uses JWT for authentication.)
+
+
+- Todos: CRUD operations
+  - Includes pagination and sorting
+- User: CRUD operations
+- Coming soon: User roles and permissions
+
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:

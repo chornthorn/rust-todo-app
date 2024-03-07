@@ -1,0 +1,25 @@
+{
+  "db_name": "MySQL",
+  "query": "SELECT COUNT(*) as total FROM todos",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | BINARY",
+          "char_set": 63,
+          "max_size": 21
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "ad00045115e98f24ba9e462f4641fd7e5dc79ca85e3fced4b9db16c2b1cfbfe2"
+}
