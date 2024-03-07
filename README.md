@@ -23,6 +23,52 @@ git clone https://github.com/chornthorn/rust-todo-app.git
 cd rust-todo-app
 ```
 
+## Setting Up the Database
+
+Before running the application, you need to set up the database. This project uses `sqlx`, which supports multiple database systems. The instructions below are for MySQL.
+
+1. Install MySQL if you haven't already. You can download it from [here](https://dev.mysql.com/downloads/installer/).
+
+2. Create a new MySQL database for the project.
+
+3. Copy the `.env.example` file to a new file named `.env`:
+
+```sh
+cp .env.example .env
+```
+
+4. Open the `.env` file and set the `DATABASE_URL` environment variable to the connection string for your database. For example, it might look like this:
+
+```sh
+DATABASE_URL=mysql://username:password@localhost/database_name
+```
+
+Replace `username`, `password`, and `database_name` with your actual MySQL username, password, and the name of the database you created.
+
+## Running Migrations
+
+This project uses `sqlx` for database migrations. To run migrations, follow these steps:
+
+1. Install the `sqlx-cli` tool if you haven't already:
+
+```sh
+brew install sqlx-cli
+```
+
+
+2. Run the migrations:
+
+```sh
+sqlx migrate run
+```
+or using cargo:
+
+```sh
+cargo sqlx migrate run
+```
+
+This will apply all migrations in the `migrations` directory to your database.
+
 ## Using <Project Name>
 
 To use <Project Name>, follow these steps:
