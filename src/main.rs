@@ -1,17 +1,9 @@
-#![allow(unused)]
-
 use crate::config::{route_not_found, AppConfig};
 use crate::shared::auth_middleware::Authentication;
-use crate::shared::jwt_middleware::JwtMiddleware;
 use crate::shared::response::JsonResponder;
-use actix_web::guard::{Guard, GuardContext};
 use actix_web::middleware::{Logger, NormalizePath, TrailingSlash};
-use actix_web::{
-    dev, error, get, guard, web, App, HttpResponse, HttpServer, Responder, ResponseError,
-};
-use futures::TryFutureExt;
+use actix_web::{error, get, web, App, HttpResponse, HttpServer, Responder};
 use sqlx::mysql::MySqlPoolOptions;
-use std::error::Error;
 use actix_cors::Cors;
 
 mod auth;
@@ -35,15 +27,19 @@ fn router_config(cfg: &mut web::ServiceConfig) {
         web::scope("/api")
             .configure(users::router)
             .configure(todos::router)
-            .configure(auth::router),
+            .configure(auth::router)
+            .configure(roles::router),
     );
 }
 
 #[rustfmt::skip]
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    color_eyre::install().expect("Failed to install color_eyre");
+
     // load environment variables
     dotenv::dotenv().ok();
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
 
     // log configuration
     std::env::set_var("RUST_LOG", "info");
@@ -53,7 +49,7 @@ async fn main() -> std::io::Result<()> {
     // create a database pool
     let pool = match MySqlPoolOptions::new()
         .max_connections(10)
-        .connect(&std::env::var("DATABASE_URL").expect("DATABASE_URL must be set"))
+        .connect(&database_url)
         .await
     {
         Ok(pool) => {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DeveloperToolsToolWindowSettingsV1" lastSelectedContentNodeId="jwt-encoder-decoder">
+    <developerToolsConfigurations>
+      <developerToolConfiguration developerToolId="jwt-encoder-decoder" id="879bc4b5-9380-46fa-b09b-36d7a45cc9a2" name="Workbench">
+        <properties>
+          <property key="payloadText" type="INPUT" value="kotlin.String|{&#10;  &quot;sub&quot;:6,&#10;  &quot;iat&quot;:1709786081,&#10;  &quot;exp&quot;:1709789681&#10;}" />
+          <property key="encodedText" type="INPUT" value="kotlin.String|eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjYsImlhdCI6MTcwOTc4NjA4MSwiZXhwIjoxNzA5Nzg5NjgxfQ.mnJmzTWdrDLVnl9gRACuqcg6XNMdNJv_RsqXFcCK8wk" />
+        </properties>
+      </developerToolConfiguration>
+    </developerToolsConfigurations>
+  </component>
+</project>

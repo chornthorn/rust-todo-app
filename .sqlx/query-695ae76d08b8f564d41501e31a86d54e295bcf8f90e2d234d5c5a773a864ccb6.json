@@ -1,0 +1,12 @@
+{
+  "db_name": "MySQL",
+  "query": "INSERT INTO todos (title, completed) VALUES (?, ?)",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Right": 2
+    },
+    "nullable": []
+  },
+  "hash": "695ae76d08b8f564d41501e31a86d54e295bcf8f90e2d234d5c5a773a864ccb6"
+}
