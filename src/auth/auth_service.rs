@@ -6,7 +6,7 @@ use crate::users::dto::CreateUserDto;
 use crate::users::users_repository::{UserRepository, UsersRepository};
 use crate::users::users_service::UsersService;
 use actix_web::HttpResponse;
-use chrono::{Duration, Utc};
+use chrono::{Duration, TimeDelta, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 use sqlx::MySqlPool;
@@ -138,7 +138,7 @@ impl AuthService {
     pub async fn generate_token(&self, user_id: u32) -> (String, String) {
         let now = Utc::now();
         let iat = now.timestamp() as usize;
-        let exp = (now + Duration::minutes(60)).timestamp() as usize;
+        let exp = (now + TimeDelta::try_minutes(60).unwrap()).timestamp() as usize;
         let claims: TokenClaims = TokenClaims {
             sub: user_id,
             exp,
@@ -156,7 +156,7 @@ impl AuthService {
 
         let now = Utc::now();
         let iat = now.timestamp() as usize;
-        let exp = (now + Duration::days(7)).timestamp() as usize;
+        let exp = (now + TimeDelta::try_days(7).unwrap()).timestamp() as usize;
         let claims: TokenClaims = TokenClaims {
             sub: user_id,
             exp,
