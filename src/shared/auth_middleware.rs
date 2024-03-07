@@ -23,10 +23,10 @@ impl ResponseError for JsonResponder {
 pub struct Authentication;
 
 impl<S, B> Transform<S, ServiceRequest> for Authentication
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
+    where
+        S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error>,
+        S::Future: 'static,
+        B: 'static,
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
@@ -44,14 +44,14 @@ pub struct AuthenticationMiddleware<S> {
 }
 
 impl<S, B> Service<ServiceRequest> for AuthenticationMiddleware<S>
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
-    S::Future: 'static,
-    B: 'static,
+    where
+        S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error>,
+        S::Future: 'static,
+        B: 'static,
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = Pin<Box<dyn Future<Output=Result<Self::Response, Self::Error>>>>;
 
     forward_ready!(service);
 
@@ -102,9 +102,6 @@ where
 }
 
 fn validate_jwt(token: &str) -> Result<TokenClaims, ()> {
-    // Here you should validate the JWT token. If the token is valid, return Ok(()), otherwise return Err(())
-    // This is just a placeholder. You should replace this with your actual JWT validation logic.
-
     let token = token.replace("Bearer ", "");
 
     match decode::<TokenClaims>(
