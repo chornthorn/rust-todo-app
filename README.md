@@ -106,4 +106,4 @@ If you want to contact me you can reach me at `thorn.c@khodedev.com`.
 
 ## License
 
-This project uses the following license: [MIT](<link>).
+This project uses the following license: [MIT](https://github.com/chornthorn/rust-todo-app/blob/main/LICENSE).
