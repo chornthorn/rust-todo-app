@@ -1,13 +1,12 @@
 use crate::config::AppConfig;
-use crate::shared::token_claim::TokenClaims;
 use crate::users::dto::{CreateUserDto, UpdateUserDto};
 use crate::users::users_service::UsersService;
-use actix_web::{delete, get, patch, post, web, HttpMessage, HttpRequest, HttpResponse, Responder};
+use actix_web::{delete, get, patch, post, web, HttpRequest, HttpResponse, Responder};
 use validator::Validate;
 
 #[get("")]
-async fn index(data: web::Data<AppConfig>, req: HttpRequest) -> impl Responder {
-    let user_id = req.extensions().get::<TokenClaims>().unwrap().sub;
+async fn index(data: web::Data<AppConfig>, _req: HttpRequest) -> impl Responder {
+    // let user_id = req.extensions().get::<TokenClaims>().unwrap().sub;
     UsersService::new(data.pool.clone()).get_all_users().await
 }
 

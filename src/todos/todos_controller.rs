@@ -3,7 +3,7 @@ use crate::shared::response::JsonResponder;
 use crate::todos::dto::{CreateTodoDto, UpdateTodoDto};
 use crate::todos::todos_service::TodosService;
 use actix_web::{delete, get, patch, post, web, Responder};
-use validator::{Validate, ValidationErrors};
+use validator::Validate;
 
 #[get("")]
 async fn get_all_todos(data: web::Data<AppConfig>) -> impl Responder {

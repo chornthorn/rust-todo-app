@@ -1,11 +1,10 @@
 use crate::auth::auth_service::AuthService;
 use crate::auth::dto::{LoginDto, RegisterDto};
 use crate::config::AppConfig;
-use crate::shared::jwt_middleware::JwtMiddleware;
 use crate::shared::jwt_refresh_token::JwtRefreshToken;
 use crate::shared::response::JsonResponder;
 use crate::shared::token_claim::TokenClaims;
-use actix_web::{get, post, web, HttpMessage, HttpRequest, HttpResponse, Responder};
+use actix_web::{get, post, web, HttpMessage, HttpRequest, Responder};
 use validator::Validate;
 
 #[post("login")]

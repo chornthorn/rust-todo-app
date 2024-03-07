@@ -22,7 +22,7 @@ async fn create(body: web::Json<CreateRoleDto>) -> impl Responder {
 }
 
 #[patch("/{id}")]
-async fn update(id: web::Path<u32>,body: web::Json<CreateRoleDto>) -> impl Responder {
+async fn update(_id: web::Path<u32>,body: web::Json<CreateRoleDto>) -> impl Responder {
     match body.validate() {
         Ok(_) => HttpResponse::Ok().body("update"),
         Err(err) => JsonResponder::validation_error(err)

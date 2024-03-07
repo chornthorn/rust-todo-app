@@ -87,16 +87,4 @@ impl UsersService {
             Err(err) => JsonResponder::match_err(err),
         }
     }
-
-    // get_user_by_email
-    pub async fn get_user_by_email(self, email: String) -> impl Responder {
-        let repository = self.repository();
-        match repository.get_user_by_email(email).await {
-            Ok(user) => JsonResponder::ok(
-                "Retrieved user successfully",
-                Some(serde_json::to_value(user).unwrap()),
-            ),
-            Err(err) => JsonResponder::match_err(err),
-        }
-    }
 }

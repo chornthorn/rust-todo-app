@@ -66,7 +66,7 @@ async fn main() -> std::io::Result<()> {
 
     // custom json configuration
     let json_cfg = web::JsonConfig::default()
-        .error_handler(|err, req| {
+        .error_handler(|err, _req| {
             error::InternalError::from_response(err, {
                 JsonResponder::bad_request("Invalid payload, please check your request body")
             }).into()
