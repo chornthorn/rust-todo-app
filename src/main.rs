@@ -19,6 +19,7 @@ mod config;
 mod shared;
 mod todos;
 mod users;
+mod roles;
 
 #[get("/")]
 async fn index() -> impl Responder {
