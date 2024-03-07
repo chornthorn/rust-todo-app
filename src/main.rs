@@ -99,7 +99,7 @@ async fn main() -> std::io::Result<()> {
             .default_service(web::route().to(route_not_found))
             .service(index)
     })
-        .workers(2)
+        // .workers(2)
         .bind("0.0.0.0:8080")?
         .run()
         .await

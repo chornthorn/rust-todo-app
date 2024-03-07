@@ -9,6 +9,7 @@ use chrono::{TimeDelta, Utc};
 use jsonwebtoken::{encode, EncodingKey, Header};
 use serde_json::json;
 use sqlx::MySqlPool;
+use crate::users::entities::User;
 
 pub struct AuthService {
     pool: MySqlPool,
@@ -30,21 +31,10 @@ impl AuthService {
         match user {
             Ok(user) => {
                 if BcryptHelper::verify_hash(&login.password, &user.password) {
-                    let (access_token, refresh_token) = self.generate_token(user.id).await;
+                    let (access_token, refresh_token) = self.generate_token(user.id);
                     JsonResponder::ok(
                         "User logged in successfully",
-                        Some(
-                            serde_json::to_value(json!(
-                                {
-                                    "token": {
-                                        "access_token": access_token,
-                                        "refresh_token": refresh_token
-                                    },
-                                    "user": user,
-                                }
-                            ))
-                            .unwrap(),
-                        ),
+                        Some(Self::create_response(access_token, refresh_token, user).await),
                     )
                 } else {
                     JsonResponder::bad_request("Invalid password")
@@ -75,19 +65,10 @@ impl AuthService {
 
                 match repository.create_user(dto.clone()).await {
                     Ok(user) => {
-                        let (access_token, refresh_token) = self.generate_token(user.id).await;
+                        let (access_token, refresh_token) = self.generate_token(user.id);
                         JsonResponder::ok(
                             "User signed up successfully",
-                            Some(
-                                serde_json::to_value(json!({
-                                    "token": {
-                                        "access_token": access_token,
-                                        "refresh_token": refresh_token
-                                    },
-                                    "user": user,
-                                }))
-                                .unwrap(),
-                            ),
+                            Some(Self::create_response(access_token, refresh_token, user).await),
                         )
                     }
                     Err(err) => JsonResponder::match_err(err),
@@ -103,21 +84,10 @@ impl AuthService {
         let user = repository.get_user_by_id(user_id).await;
         match user {
             Ok(user) => {
-                let (access_token, refresh_token) = self.generate_token(user.id).await;
+                let (access_token, refresh_token) = self.generate_token(user.id);
                 JsonResponder::ok(
                     "Token refreshed successfully",
-                    Some(
-                        serde_json::to_value(json!(
-                            {
-                                "token": {
-                                    "access_token": access_token,
-                                    "refresh_token": refresh_token
-                                },
-                                "user": user,
-                            }
-                        ))
-                        .unwrap(),
-                    ),
+                    Some(Self::create_response(access_token, refresh_token, user).await),
                 )
             }
             Err(e) => JsonResponder::match_err(e),
@@ -128,49 +98,52 @@ impl AuthService {
         let repository = self.user_repository();
         let user = repository.get_user_by_id(user_id).await;
         match user {
-            Ok(user) => JsonResponder::ok("User info", Some(serde_json::to_value(user).unwrap())),
+            Ok(user) => JsonResponder::ok(
+                "User info", 
+                Some(serde_json::to_value(user).unwrap())
+            ),
             Err(e) => JsonResponder::match_err(e),
         }
     }
 
-    // generate either a refresh token or an access token and return as string tuple token string
-    pub async fn generate_token(&self, user_id: u32) -> (String, String) {
-        let now = Utc::now();
-        let iat = now.timestamp() as usize;
-        let exp = (now + TimeDelta::try_minutes(60).unwrap()).timestamp() as usize;
-        let claims: TokenClaims = TokenClaims {
-            sub: user_id,
-            exp,
-            iat,
-        };
-
-        let access_secret =
-            std::env::var("ACCESS_TOKEN_SECRET").expect("ACCESS_TOKEN_SECRET must be set");
-        let access_token = encode(
-            &Header::default(),
-            &claims,
-            &EncodingKey::from_secret(access_secret.as_ref()),
-        )
-        .unwrap();
-
-        let now = Utc::now();
-        let iat = now.timestamp() as usize;
-        let exp = (now + TimeDelta::try_days(7).unwrap()).timestamp() as usize;
-        let claims: TokenClaims = TokenClaims {
-            sub: user_id,
-            exp,
-            iat,
-        };
-
-        let refresh_secret =
-            std::env::var("REFRESH_TOKEN_SECRET").expect("REFRESH_TOKEN_SECRET must be set");
-        let refresh_token = encode(
-            &Header::default(),
-            &claims,
-            &EncodingKey::from_secret(refresh_secret.as_ref()),
-        )
-        .unwrap();
-
+    // Generate access and refresh tokens
+    pub fn generate_token(&self, user_id: u32) -> (String, String) {
+        let access_token = self.create_token(user_id, 60, "ACCESS_TOKEN_SECRET");
+        let refresh_token = self.create_token(user_id, 60 * 24 * 7, "REFRESH_TOKEN_SECRET");
         (access_token, refresh_token)
+    }
+
+    // Create a token
+    fn create_token(&self, user_id: u32, minutes: i64, secret_key: &str) -> String {
+        let now = Utc::now();
+        let iat = now.timestamp() as usize;
+        let exp = (now + TimeDelta::try_minutes(minutes).unwrap()).timestamp() as usize;
+        let claims: TokenClaims = TokenClaims { sub: user_id, exp, iat };
+
+        let secret = std::env::var(secret_key).expect(&format!("{} must be set", secret_key));
+        let token = encode(
+            &Header::default(),
+            &claims,
+            &EncodingKey::from_secret(secret.as_ref()),
+        )
+            .unwrap();
+
+        token
+    }
+
+    async fn create_response(
+        access_token: String,
+        refresh_token: String,
+        user: User,
+    ) -> serde_json::Value {
+        serde_json::to_value(json!(
+            {
+                "token": {
+                    "access_token": access_token,
+                    "refresh_token": refresh_token
+                },
+                "user": user
+            }
+        )).unwrap()
     }
 }
