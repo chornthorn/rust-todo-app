@@ -1,0 +1,25 @@
+{
+  "db_name": "MySQL",
+  "query": "select count(*) as total from roles",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total",
+        "type_info": {
+          "type": "LongLong",
+          "flags": "NOT_NULL | BINARY",
+          "char_set": 63,
+          "max_size": 21
+        }
+      }
+    ],
+    "parameters": {
+      "Right": 0
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "0beb6b589f4b4e1e88497c5f0f75fb98a79cd6ba7a57e526f951556b5d8d5767"
+}

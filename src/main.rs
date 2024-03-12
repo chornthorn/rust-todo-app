@@ -12,6 +12,7 @@ mod shared;
 mod todos;
 mod users;
 mod roles;
+mod permissions;
 
 #[get("/")]
 async fn index() -> impl Responder {
@@ -28,7 +29,8 @@ fn router_config(cfg: &mut web::ServiceConfig) {
             .configure(users::router)
             .configure(todos::router)
             .configure(auth::router)
-            .configure(roles::router),
+            .configure(roles::router)
+            .configure(permissions::router),
     );
 }
 

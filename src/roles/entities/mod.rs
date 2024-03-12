@@ -4,6 +4,7 @@ use sqlx::FromRow;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Role {
+    pub id: u32,
     pub name: String,
     pub description: Option<String>,
 }
